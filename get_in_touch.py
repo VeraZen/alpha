@@ -3,11 +3,15 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import os
 from time import sleep
+from datetime import datetime
 
 dir = os.path.dirname(__file__)
 chrome_driver_path = dir + '\chromedriver.exe'
 
 class Get_In_Touch_Tests(unittest.TestCase):
+
+    now = datetime.now()
+    now_time = datetime.strftime(datetime.now(), "%Y%m%d_%H%M%S")
 
     email_xpath = "//label[@for='id_email']/span"
     name_xpath = "//label[@for='id_full_name']/span"
@@ -50,6 +54,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
 
     budget_range_xpath = "//p[@class='js-range-params']/span"
 
+
+
     @classmethod
     def setUp(cls):
         cls.browser = webdriver.Chrome(chrome_driver_path)
@@ -61,6 +67,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
     def test_elements_presence(self):
 
         browser = self.browser
+        now_time = self.now_time
+
         my_target_is = browser.find_element_by_xpath("//div[@id='feedback']/h2")
         self.assertEqual(my_target_is.text, 'MY TARGET IS')
 
@@ -94,6 +102,7 @@ class Get_In_Touch_Tests(unittest.TestCase):
     def test_empty_send(self):
 
         browser = self.browser
+        now_time = self.now_time
 
         name = browser.find_element_by_xpath(self.name_xpath)
         self.assertEqual(name.text, 'Name*')
@@ -111,9 +120,12 @@ class Get_In_Touch_Tests(unittest.TestCase):
         self.assertTrue(name_error_border.is_displayed())
         self.assertTrue(email_error_border.is_displayed())
 
+        browser.get_screenshot_as_file("./screenshots/empty_send_%s.png"%now_time)
+
     def test_invalid_email(self):
 
         browser = self.browser
+        now_time = self.now_time
 
         email = browser.find_element_by_xpath(self.email_xpath)
         send_button = browser.find_element_by_xpath(self.send_button_xpath)
@@ -141,6 +153,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
         #check green borders around input fields + link to page + greeting message
 
         browser = self.browser
+        now_time = self.now_time
+
         name_input = browser.find_element_by_id(self.name_input_id)
         email_input = browser.find_element_by_id(self.email_input_id)
         phone_input = browser.find_element_by_id(self.phone_input_id)
@@ -172,10 +186,14 @@ class Get_In_Touch_Tests(unittest.TestCase):
         self.assertEqual(greeting_1.text, 'THANK YOU FOR YOUR FEEDBACK')
         self.assertEqual(greeting_2.text, "We'll reply you as soon as possible ;)")
 
+        browser.get_screenshot_as_file("./screenshots/congrats_%s.png"%now_time)
+
     def test_platform_parameters(self):
         #check text near Platform when choosing the checkboxes
 
         browser = self.browser
+        now_time = self.now_time
+
         web_platform = browser.find_element_by_xpath(self.web_platform_xpath)
         ios_platform = browser.find_element_by_xpath(self.ios_platform_xpath)
         android_platform = browser.find_element_by_xpath(self.android_platform_xpath)
@@ -188,6 +206,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
         sleep(2)
         self.assertEqual(platform_parameters.text, 'Web')
 
+        browser.get_screenshot_as_file("./screenshots/platform_parameters.png")
+
         ios_platform.click()
         sleep(2)
         self.assertEqual(platform_parameters.text, 'Web, iOS')
@@ -199,6 +219,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
         custom_platform.click()
         sleep(2)
         self.assertEqual(platform_parameters.text, 'Web, iOS, Android, Custom')
+
+        browser.get_screenshot_as_file("./screenshots/platform_parameters_%s.png"%now_time)
 
         web_platform.click()
         sleep(2)
@@ -214,6 +236,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
         # check text near Delivery when choosing the radiobuttons
 
         browser = self.browser
+        now_time = self.now_time
+
         prototype = browser.find_element_by_xpath(self.prototype_xpath)
         mvp = browser.find_element_by_xpath(self.mvp_xpath)
         complete = browser.find_element_by_xpath(self.complete_xpath)
@@ -225,6 +249,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
         prototype.click()
         sleep(2)
         self.assertEqual(delivery_parameters.text, 'Prototype')
+
+        browser.get_screenshot_as_file("./screenshots/delivery_parameters_%s.png"%now_time)
 
         mvp.click()
         sleep(2)
@@ -246,6 +272,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
         # check text near Budget Range when choosing the radiobuttons
 
         browser = self.browser
+        now_time = self.now_time
+
         ten = browser.find_element_by_xpath(self.ten_xpath)
         twentyfive = browser.find_element_by_xpath(self.twentyfive_xpath)
         fifty = browser.find_element_by_xpath(self.fifty_xpath)
@@ -261,6 +289,8 @@ class Get_In_Touch_Tests(unittest.TestCase):
         twentyfive.click()
         sleep(3)
         self.assertEqual(budget_range.text, '$25K - $50K')
+
+        browser.get_screenshot_as_file("./screenshots/budget_range_%s.png"%now_time)
 
         fifty.click()
         sleep(2)
