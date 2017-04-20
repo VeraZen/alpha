@@ -36,6 +36,20 @@ class Get_In_Touch_Tests(unittest.TestCase):
 
     platform_parameters_xpath = "//p[@class='js-checkbox-params']/span"
 
+    prototype_xpath = "//input[@name='delivery'][@value='Prototype']"
+    mvp_xpath = "//input[@name='delivery'][@value='MVP']"
+    complete_xpath = "//input[@name='delivery'][@value='Complete']"
+    existing_xpath = "//input[@name='delivery'][@value='Existing']"
+
+    delivery_parameters_xpath = "//p[@class='js-radio-params']/span"
+
+    ten_xpath = "//input[@name='budget'][@value='$10K - $25K']"
+    twentyfive_xpath = "//input[@name='budget'][@value='$25K - $50K']"
+    fifty_xpath = "//input[@name='budget'][@value='$50K - $100K']"
+    hundred_xpath = "//input[@name='budget'][@value='$100K - $200K+']"
+
+    budget_range_xpath = "//p[@class='js-range-params']/span"
+
     @classmethod
     def setUp(cls):
         cls.browser = webdriver.Chrome(chrome_driver_path)
@@ -196,7 +210,70 @@ class Get_In_Touch_Tests(unittest.TestCase):
         sleep(2)
         self.assertEqual(platform_parameters.text, '')
 
+    def test_delivery_parameters(self):
+        # check text near Delivery when choosing the radiobuttons
 
+        browser = self.browser
+        prototype = browser.find_element_by_xpath(self.prototype_xpath)
+        mvp = browser.find_element_by_xpath(self.mvp_xpath)
+        complete = browser.find_element_by_xpath(self.complete_xpath)
+        existing = browser.find_element_by_xpath(self.existing_xpath)
+
+        delivery_parameters = browser.find_element_by_xpath(self.delivery_parameters_xpath)
+        self.assertEqual(delivery_parameters.text, '')
+
+        prototype.click()
+        sleep(2)
+        self.assertEqual(delivery_parameters.text, 'Prototype')
+
+        mvp.click()
+        sleep(2)
+        self.assertEqual(delivery_parameters.text, 'MVP')
+
+        complete.click()
+        sleep(2)
+        self.assertEqual(delivery_parameters.text, 'Complete')
+
+        existing.click()
+        sleep(2)
+        self.assertEqual(delivery_parameters.text, 'Existing')
+
+        prototype.click()
+        sleep(2)
+        self.assertEqual(delivery_parameters.text, 'Prototype')
+
+    def test_budget_range(self):
+        # check text near Budget Range when choosing the radiobuttons
+
+        browser = self.browser
+        ten = browser.find_element_by_xpath(self.ten_xpath)
+        twentyfive = browser.find_element_by_xpath(self.twentyfive_xpath)
+        fifty = browser.find_element_by_xpath(self.fifty_xpath)
+        hundred = browser.find_element_by_xpath(self.hundred_xpath)
+
+        budget_range = browser.find_element_by_xpath(self.budget_range_xpath)
+        self.assertEqual(budget_range.text, '')
+
+        ten.click()
+        sleep(2)
+        self.assertEqual(budget_range.text, '$10K - $25K')
+
+        twentyfive.click()
+        sleep(3)
+        self.assertEqual(budget_range.text, '$25K - $50K')
+
+        fifty.click()
+        sleep(2)
+        self.assertEqual(budget_range.text, '$50K - $100K')
+
+        browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        hundred.click()
+        sleep(2)
+        self.assertEqual(budget_range.text, '$100K - $200K+')
+
+        ten.click()
+        sleep(2)
+        self.assertEqual(budget_range.text, '$10K - $25K')
 
     @classmethod
     def tearDown(cls):
