@@ -16,7 +16,7 @@ def browser():
 
 def test_dip_spv_calc(browser):
     # Test verifies the
-    page = DipCalcPage(browser, 'https://molo:lambda@dev.app.molofinance.com/form/')
+    page = DipCalcPage(browser, 'https://dev.app.molofinance.com/form/')
     browser.visit("https://dev.app.molofinance.com/form/")
     page.company_button.click()
 
