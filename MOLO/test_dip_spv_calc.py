@@ -5,6 +5,7 @@ from time import sleep
 from dip_calculator_page import DipCalcPage
 from dip_user_data_page import DipUDataPage
 from dip_consent_page import DipConsentPage
+from dip_almost_page import DipAlmostPage
 
 @pytest.fixture
 def browser():
@@ -16,8 +17,8 @@ def browser():
 
 def test_dip_spv_calc(browser):
     # Test verifies the
-    page = DipCalcPage(browser, 'https://dev.app.molofinance.com/form/')
-    browser.visit("https://dev.app.molofinance.com/form/")
+    page = DipCalcPage(browser, 'https://molo:lambda@dev.app.molofinance.com/calculator/')
+    browser.visit("https://dev.app.molofinance.com/calculator/")
     page.company_button.click()
 
     #check the default data in fields
@@ -30,7 +31,7 @@ def test_dip_spv_calc(browser):
     page.driver.switch_to_active_element().send_keys(Keys.CONTROL + "a")
     page.driver.switch_to_active_element().send_keys(Keys.DELETE)
     page.income_input.fill('40000')
-
+    sleep(3)
     page.property_value_input.click()
     page.driver.switch_to_active_element().send_keys(Keys.CONTROL + "a")
     page.driver.switch_to_active_element().send_keys(Keys.DELETE)
@@ -42,7 +43,9 @@ def test_dip_spv_calc(browser):
     page = DipUDataPage(browser)
     page.salut_dropdown.click()
     page.mr_choise.click()
+    sleep(2)
     page.first_name_input.fill('Daenerys')
+    page.middle_name_input.fill('Blondie')
     page.last_name_input.fill('Targaryen')
     page.birth_date_input.fill('11111979')
     page.phone_input.fill('441617777777')
@@ -72,6 +75,7 @@ def test_dip_spv_calc(browser):
     page.submit_button.click()
     sleep(3)
     assert browser.url == "https://dev.app.molofinance.com/almost"
-    assert browser.is_text_present("We've sent you an email. "
-                                   "Follow the link in the email to confirm your email address.") is True
+    # page = DipAlmostPage
+    # assert page.continue_button_visible is True
+    assert browser.find_by_xpath('//*[@data-test="dip-email-verified-continue-submit"]').visible is True
 
