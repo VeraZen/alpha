@@ -10,7 +10,7 @@ class DipUDataPage:
 
     @property
     def salut_dropdown(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[1]/div[1]/div/div/div/div')
+        return self.browser.find_by_xpath('//*[@data-test="dip-applicant-title-select"]')
 
     @property
     def mr_choise(self):
@@ -21,12 +21,16 @@ class DipUDataPage:
         return self.browser.find_by_xpath('//input[@name="customers[0].first_name"]')
 
     @property
+    def middle_name_input(self):
+        return self.browser.find_by_xpath('//input[@name="customers[0].middle_name"]')
+
+    @property
     def last_name_input(self):
         return self.browser.find_by_xpath('//input[@name="customers[0].last_name"]')
 
     @property
     def birth_date_input(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[2]/div[1]/div/div/input')
+        return self.browser.find_by_xpath('//*[@data-test="dip-applicant-birth-date-input"]')
 
     @property
     def phone_input(self):
@@ -34,7 +38,7 @@ class DipUDataPage:
 
     @property
     def address_input(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[3]/div/div/div/div/div[1]/div/input')
+        return self.browser.find_by_xpath('//*[@data-test="dip-applicant-address-search"]')
 
     @property
     def address_list(self):

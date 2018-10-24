@@ -10,27 +10,27 @@ class DipCalcPage:
 
     @property
     def company_button(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[1]/div/div/div/label[2]/span[2]')
+        return self.browser.find_by_xpath('/html/body/div[3]/div/div[1]/form/div[1]/div/div/div/label[2]')
 
     @property
     def remort_borrow_more_button(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[2]/div[1]/div/div/label[3]/span[2]')
+        return self.browser.find_by_xpath('//*[@data-test="dip-radio-item-mortgage-type-remortgage-current"]')
 
     @property
     def income_input(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[2]/div[2]/div/div/div/input')
+        return self.browser.find_by_xpath('//input[@data-test="dip-customer-income-input"]')
 
     @property
     def rent_input(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[3]/div[1]/div/div/div/input')
+        return self.browser.find_by_xpath('//input[@data-test="dip-rent-amount"]')
 
     @property
     def property_value_input(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[3]/div[2]/div/div/div/input')
+        return self.browser.find_by_xpath('//input[@name="property_value"]')
 
     @property
     def desired_loan_amount_input(self):
-        return self.browser.find_by_xpath('//*[@id="root"]/div/div[1]/div/form/div[4]/div[1]/div/div/div/input')
+        return self.browser.find_by_xpath('//input[@name="desired_loan_amount"]')
 
     @property
     def submit_button(self):

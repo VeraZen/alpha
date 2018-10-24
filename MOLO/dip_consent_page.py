@@ -10,7 +10,7 @@ class DipConsentPage:
 
     @property
     def required_warning(self):
-        return self.browser.find_by_text('Required')
+        return self.browser.find_by_xpath('//*[@class="jss315 _24gjtBtiW- jss316"]')
 
     @property
     def uk_resident_checkbox(self):
