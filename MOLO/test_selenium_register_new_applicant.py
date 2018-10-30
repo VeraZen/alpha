@@ -1,7 +1,8 @@
-import pytest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
+#from selenium.webdriver import ActionChains
+#
+import pytest
 from time import sleep
 from datetime import date, datetime, timedelta
 from random import randint
@@ -13,13 +14,16 @@ from selenium_login_page import LoginPage
 from selenium_dashboard_page import DashboardPage
 from selenium_congrats_page import CongratsPage
 from selenium_property_page import PropertyPage
+from selenium_product_selector_page import AddressPage
+
 
 @pytest.fixture
 def browser():
     driver = webdriver.Chrome()
-    #driver.maximize_window()
+    # driver.maximize_window()
     driver.implicitly_wait(10)
     return driver
+
 
 @pytest.fixture(scope="module")
 def applicant():
@@ -31,39 +35,41 @@ def applicant():
 
     # Applicant data
     applicant = {
-        'title':'mr',
-        'first_name':'Jonathan',
-        'middle_name':'Middle',
-        'last_name':'Frafer',
-        'phone':'+44 161 4521 254',
-        'register_address':'60 Westfield Road, Barton-Upon-Humber, DN18',
-        'history_property_address':'34 Abbots Road, Abbots Langley, WD5',
-        'property_address':'2 Fiars Terrace, Stafford, ST17',
-        'year_built':'1900',
-        'purchase_price':'110000',
-        'monthly_rent':'1100',
-        'property_type':'House - Mid terrace',
-        'bedrooms':'2',
-        'is_ex_local':'NO',
-        'is_HMO':'NO',
-        'loan_type':'new',
-        'loan_years':'25',
-        'loan_amount':'80000',
-        'source_of_deposit':'Savings',
+        'title': 'mr',
+        'first_name': 'Jonathan',
+        'middle_name': 'Middle',
+        'last_name': 'Frafer',
+        'phone': '+44 161 4521 254',
+        'register_address': '60 Westfield Road, Barton-Upon-Humber, DN18',
+        'history_property_address': '34 Abbots Road, Abbots Langley, WD5',
+        'property_address': '2 Fiars Terrace, Stafford, ST17',
+        'year_built': '1900',
+        'purchase_price': '110000',
+        'monthly_rent': '1100',
+        'property_type': 'House - Mid terrace',
+        'bedrooms': '2',
+        'is_ex_local': 'NO',
+        'is_HMO': 'NO',
+        'loan_type': 'new',
+        'loan_years': '25',
+        'loan_amount': '80000',
+        'source_of_deposit': 'Savings',
         'email': f'vasily.medved+{randint(11111,99999)}@djangostars.com',
         'password': 'qqweqqwe',
         'birth_date': APPLICANT_DOB
     }
     return applicant
 
+
 def molo_address(browser, element, value):
     element.send_keys(value)
-    sleep(1) #TBD refactor to avoid dumb wait
+    sleep(1)  # TBD refactor to avoid dumb wait
     browser.switch_to.active_element.send_keys(Keys.DOWN)
     browser.switch_to.active_element.send_keys(Keys.ENTER)
 
-#@pytest.mark.skip
-def test_create_new_user(browser,applicant):
+
+@pytest.mark.skip
+def test_create_new_user(browser, applicant):
     # 1. Open {server} and go to default calculator page
     page = DipCalcPage(browser, 'https://dev.app.molofinance.com/calculator/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
@@ -107,12 +113,14 @@ def test_create_new_user(browser,applicant):
     page.submit_button.click()
     browser.implicitly_wait(10)
     assert browser.current_url == "https://dev.app.molofinance.com/almost"
-    assert browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div/h2').text == 'ON YOUR WAY TO AN INSTANT MORTGAGE!'
+    assert browser.find_element_by_xpath(
+        '//*[@id="root"]/div/div[1]/div/h2').text == 'ON YOUR WAY TO AN INSTANT MORTGAGE!'
     print(applicant['email'])
-    #browser.close()
+    # browser.close()
 
-#@pytest.mark.skip
-def test_login_and_be_happy_registered_user(browser,applicant):
+
+# @pytest.mark.skip
+def test_login_and_be_happy_registered_user(browser, applicant):
     page = LoginPage(browser, 'https://dev.app.molofinance.com/login/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
     # see 'https://github.com/w3c/webdriver/issues/385'
@@ -148,14 +156,20 @@ def test_login_and_be_happy_registered_user(browser,applicant):
     page.monthly_rent_input.send_keys(applicant['monthly_rent'])
     page.bedroooms_qty_input.send_keys(applicant['bedrooms'])
     page.property_type_dropdown.click()
-    sleep(1)
+    browser.switch_to.active_element.click()
     if applicant['property_type'] == 'House - Mid terrace':
         page.property_type_mid_terrace_choice.click()
+    sleep(1)
+    page.property_construction_material_dropdown.click()
+    browser.switch_to.active_element.click()
+    page.property_construction_material_choise.click()
+    sleep(1)
+    page.exlocal_no_radiobutton.click()
+    page.hmo_no_radiobutton.click()
+    page.continue_button.click()
+
+
+    # Select product page
+    page = AddressPage(browser)
     sleep(1000)
 
-    '''
-    page.history_property.send_keys(applicant['history_property_address'])
-    sleep(1)  # TBD refactor to avoid dumb wait
-    browser.switch_to.active_element.send_keys(Keys.DOWN)
-    browser.switch_to.active_element.send_keys(Keys.ENTER)
-    '''
