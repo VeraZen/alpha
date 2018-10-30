@@ -40,7 +40,7 @@ def applicant(key):
 
 def test_create_new_user(browser):
     # 1. Open {server}
-    page = DipCalcPage(browser, 'https://molo:lambda@dev.app.molofinance.com/calculator/')
+    page = DipCalcPage(browser, 'https://dev.app.molofinance.com/calculator/')
     browser.visit("https://dev.app.molofinance.com/calculator/")
     #check the default data in fields - not that necessary actually)
     page.individual_button.click()

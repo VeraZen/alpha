@@ -65,7 +65,7 @@ def molo_address(browser, element, value):
 #@pytest.mark.skip
 def test_create_new_user(browser,applicant):
     # 1. Open {server} and go to default calculator page
-    page = DipCalcPage(browser, 'https://molo:lambda@dev.app.molofinance.com/calculator/')
+    page = DipCalcPage(browser, 'https://dev.app.molofinance.com/calculator/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
     # see 'https://github.com/w3c/webdriver/issues/385'
     browser.get("https://dev.app.molofinance.com/calculator/")
@@ -113,7 +113,7 @@ def test_create_new_user(browser,applicant):
 
 #@pytest.mark.skip
 def test_login_and_be_happy_registered_user(browser,applicant):
-    page = LoginPage(browser, 'https://molo:lambda@dev.app.molofinance.com/login/')
+    page = LoginPage(browser, 'https://dev.app.molofinance.com/login/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
     # see 'https://github.com/w3c/webdriver/issues/385'
     browser.get('https://dev.app.molofinance.com/login/')
