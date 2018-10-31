@@ -1,7 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-#from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 #
+#from selenium.webdriver import ActionChains
 import pytest
 from time import sleep
 from datetime import date, datetime, timedelta
@@ -16,12 +19,14 @@ from selenium_congrats_page import CongratsPage
 from selenium_property_page import PropertyPage
 from selenium_product_selector_page import AddressPage
 
+URL = 'dev.app.molofinance.com'
+CREDS = 'molo:lambda'
 
 @pytest.fixture
 def browser():
     driver = webdriver.Chrome()
     # driver.maximize_window()
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(5)
     return driver
 
 
@@ -67,14 +72,22 @@ def molo_address(browser, element, value):
     browser.switch_to.active_element.send_keys(Keys.DOWN)
     browser.switch_to.active_element.send_keys(Keys.ENTER)
 
+def explicit_wait(browser,element,time=10):
+    WebDriverWait(browser, time).until(
+        EC.visibility_of(element)
+    )
+
+
 
 @pytest.mark.skip
 def test_create_new_user(browser, applicant):
+    # TBD get rid of this
+    global URL, CREDS
     # 1. Open {server} and go to default calculator page
-    page = DipCalcPage(browser, 'https://dev.app.molofinance.com/calculator/')
+    page = DipCalcPage(browser, f'https://{CREDS}@{URL}/calculator/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
     # see 'https://github.com/w3c/webdriver/issues/385'
-    browser.get("https://dev.app.molofinance.com/calculator/")
+    browser.get(f'https://{URL}/calculator/')
 
     # assert defaults
     page.income_input.click()
@@ -112,7 +125,7 @@ def test_create_new_user(browser, applicant):
     page.privacy_policy_checkbox.click()
     page.submit_button.click()
     browser.implicitly_wait(10)
-    assert browser.current_url == "https://dev.app.molofinance.com/almost"
+    assert browser.current_url == f'{URL}/almost'
     assert browser.find_element_by_xpath(
         '//*[@id="root"]/div/div[1]/div/h2').text == 'ON YOUR WAY TO AN INSTANT MORTGAGE!'
     print(applicant['email'])
@@ -121,17 +134,22 @@ def test_create_new_user(browser, applicant):
 
 # @pytest.mark.skip
 def test_login_and_be_happy_registered_user(browser, applicant):
-    page = LoginPage(browser, 'https://dev.app.molofinance.com/login/')
+    # TBD get rid of this
+    global URL, CREDS
+    #
+    page = LoginPage(browser, f'https://{CREDS}@{URL}/login/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
     # see 'https://github.com/w3c/webdriver/issues/385'
-    browser.get('https://dev.app.molofinance.com/login/')
-    page.email_input.send_keys('vasily.medved+94364@djangostars.com')
+    browser.get(f'https://{URL}/login/')
+    page.email_input.send_keys('vasily.medved+72950@djangostars.com')
     page.password_input.send_keys(applicant['password'])
     page.login_button.click()
-    sleep(5)
+    # browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div/div/h4').is_displayed()
+    page = DashboardPage(browser)
+    explicit_wait(browser, page.my_mortages_table)
 
     #
-    page = DashboardPage(browser, 'https://dev.app.molofinance.com/dashboard')
+    page = DashboardPage(browser, f'https://{URL}/dashboard')
     # Check if button Start DIP shown (means that user is new and fresh). If not we proceed straight to property history page OR to property page in case when history property is already entered
     if page.action_button.text == 'START DIP':
         # Congrats page
