@@ -1,15 +1,17 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import *
 #
-#from selenium.webdriver import ActionChains
+
 import pytest
 from time import sleep
 from datetime import date, datetime, timedelta
 from random import randint
 #
+from selenium_header_page import HeaderPage
 from selenium_dip_consent_page import DipConsentPage
 from selenium_dip_calculator_page import DipCalcPage
 from selenium_dip_user_data_page import DipUDataPage
@@ -26,7 +28,7 @@ CREDS = 'molo:lambda'
 def browser():
     driver = webdriver.Chrome()
     # driver.maximize_window()
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(20)
     return driver
 
 
@@ -66,17 +68,19 @@ def applicant():
     return applicant
 
 
-def molo_address(browser, element, value):
-    element.send_keys(value)
-    sleep(1)  # TBD refactor to avoid dumb wait
-    browser.switch_to.active_element.send_keys(Keys.DOWN)
-    browser.switch_to.active_element.send_keys(Keys.ENTER)
-
-def explicit_wait(browser,element,time=10):
+def explicit_wait(element, browser=browser, time=10):
     WebDriverWait(browser, time).until(
         EC.visibility_of(element)
     )
 
+
+def molo_address(browser, element, value):
+    # There are no simple way to check if react-autosuggest field is populated with value
+    element.send_keys(value)
+    sleep(2)
+    browser.switch_to.active_element.send_keys(Keys.DOWN)
+    sleep(2)
+    browser.switch_to.active_element.send_keys(Keys.ENTER)
 
 
 @pytest.mark.skip
@@ -87,19 +91,21 @@ def test_create_new_user(browser, applicant):
     page = DipCalcPage(browser, f'https://{CREDS}@{URL}/calculator/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
     # see 'https://github.com/w3c/webdriver/issues/385'
+    explicit_wait(page.desired_loan_amount_input)
     browser.get(f'https://{URL}/calculator/')
 
     # assert defaults
-    page.income_input.click()
+    explicit_wait(page.income_input)
     assert page.income_input.get_attribute("value") == '60,000'
-    assert page.rent_input.get_attribute("value") == '1,100'
+    assert page.rent_input.get_attribute("value") == '1,200'
     assert page.property_value_input.get_attribute("value") == '250,000'
-    assert page.desired_loan_amount_input.get_attribute("value") == '200,000'
+    assert page.desired_loan_amount_input.get_attribute("value") == '150,000'
     # test starts here
 
     # go to User data page
     page.submit_button.click()
     page = DipUDataPage(browser)
+    explicit_wait(page.tell_us)
     assert page.tell_us.text == 'TELL US A BIT ABOUT YOURSELF'
     page.mr_choise.click()
     if applicant['title'] == 'mr':
@@ -110,7 +116,7 @@ def test_create_new_user(browser, applicant):
     page.last_name_input.send_keys(applicant['last_name'])
     page.phone_input.send_keys(applicant['phone'])
     page.birth_date_input.send_keys(applicant['birth_date'])
-    page.address_input.click()
+    explicit_wait(page.address_input)
     molo_address(browser, page.address_input, applicant['register_address'])
     #
     page.email_input.send_keys(applicant['email'])
@@ -124,70 +130,84 @@ def test_create_new_user(browser, applicant):
     page.soft_credit_check_checkbox.click()
     page.privacy_policy_checkbox.click()
     page.submit_button.click()
-    browser.implicitly_wait(10)
-    assert browser.current_url == f'{URL}/almost'
-    assert browser.find_element_by_xpath(
-        '//*[@id="root"]/div/div[1]/div/h2').text == 'ON YOUR WAY TO AN INSTANT MORTGAGE!'
-    print(applicant['email'])
-    # browser.close()
+    sleep(10)
+    browser.close()
 
 
-# @pytest.mark.skip
 def test_login_and_be_happy_registered_user(browser, applicant):
-    # TBD get rid of this
+    # time to activate user account manually. To be deleted
     global URL, CREDS
     #
     page = LoginPage(browser, f'https://{CREDS}@{URL}/login/')
     # Must reopen the page again since Selenium have no normal ability to do basic auth, and MOLO brakes when opened with creds in URL
     # see 'https://github.com/w3c/webdriver/issues/385'
+    explicit_wait(page.login_button)
     browser.get(f'https://{URL}/login/')
-    page.email_input.send_keys('vasily.medved+72950@djangostars.com')
+    explicit_wait(page.login_button)
+    page.email_input.send_keys('vasily.medved+65374@djangostars.com')
     page.password_input.send_keys(applicant['password'])
     page.login_button.click()
-    # browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div/div/h4').is_displayed()
-    page = DashboardPage(browser)
-    explicit_wait(browser, page.my_mortages_table)
+    sleep(5)
 
-    #
-    page = DashboardPage(browser, f'https://{URL}/dashboard')
-    # Check if button Start DIP shown (means that user is new and fresh). If not we proceed straight to property history page OR to property page in case when history property is already entered
-    if page.action_button.text == 'START DIP':
-        # Congrats page
-        page.action_button.click()
-        sleep(5)
-        page = CongratsPage(browser)
-        sleep(5)
-        page.submit_button.click()
-    elif page.action_button.text == 'PROPERTY EVALUATION':
-        # Property history page
-        page.action_button.click()
-        page = PropertyPage(browser)
+    # Dashboard page
+    page = HeaderPage(browser)
+    explicit_wait(page.your_account_menu)
+    page.your_account_menu.click()
+    explicit_wait(page.calculator_menu)
+    page.calculator_menu.click()
+
+    # Calculator page
+    assert ('calculator' in browser.current_url) == True
+    page = DipCalcPage(browser)
+    explicit_wait(page.products_table)
+    explicit_wait(page.submit_button,time=60)
+    page.submit_button.click()
+
+    # Congrats page
+    page = CongratsPage(browser)
+    explicit_wait(page.submit_button,60)
+    assert ('congrats' in browser.current_url) == True
+    page.submit_button.click()
+
+    # Address history verification page (optional)
+    page = PropertyPage(browser)
+    sleep(5)
+    if ('address-history-verification' in browser.current_url) == True:
+        explicit_wait(page.history_property)
         molo_address(browser, page.history_property, applicant['history_property_address'])
-        sleep(5)
-    page.action_button.click()
+        explicit_wait(page.history_page_submit_button)
+        page.history_page_submit_button.click()
 
     # Property details page
+    # Sorry for the sleeps, I honestly tried.
     page = PropertyPage(browser)
+    explicit_wait(page.address_input)
     molo_address(browser, page.address_input, applicant['property_address'])
     page.built_year_input.send_keys(applicant['year_built'])
     page.property_price_input.send_keys(applicant['purchase_price'])
     page.monthly_rent_input.send_keys(applicant['monthly_rent'])
     page.bedroooms_qty_input.send_keys(applicant['bedrooms'])
-    page.property_type_dropdown.click()
-    browser.switch_to.active_element.click()
-    if applicant['property_type'] == 'House - Mid terrace':
-        page.property_type_mid_terrace_choice.click()
+    # the sleeps looks like optimal solution for race conditions between browser and selenium when working with custom MaterialUI React elements
+    # see also https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+    # sleep(1)
+
+    ActionChains(browser).move_to_element(page.property_type_dropdown).click(page.property_type_dropdown).perform()
+    sleep(0.5)
+    explicit_wait(page.property_type_mid_terrace_choice)
+    page.property_type_mid_terrace_choice.click()
     sleep(1)
-    page.property_construction_material_dropdown.click()
-    browser.switch_to.active_element.click()
+    ActionChains(browser).move_to_element(page.property_construction_material_dropdown).click(
+        page.property_construction_material_dropdown).perform()
+    sleep(0.5)
+    explicit_wait(page.property_construction_material_choise)
     page.property_construction_material_choise.click()
     sleep(1)
-    page.exlocal_no_radiobutton.click()
     page.hmo_no_radiobutton.click()
+    page.exlocal_no_radiobutton.click()
+    explicit_wait(page.continue_button)
     page.continue_button.click()
+    sleep(10)
 
 
-    # Select product page
-    page = AddressPage(browser)
-    sleep(1000)
+
 
