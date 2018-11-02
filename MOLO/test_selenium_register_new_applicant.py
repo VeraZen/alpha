@@ -19,7 +19,8 @@ from selenium_login_page import LoginPage
 from selenium_dashboard_page import DashboardPage
 from selenium_congrats_page import CongratsPage
 from selenium_property_page import PropertyPage
-from selenium_product_selector_page import AddressPage
+from selenium_product_selector_page import ProductSelectorPage
+from selenium_product_terms_page import ProductTerms
 
 URL = 'dev.app.molofinance.com'
 CREDS = 'molo:lambda'
@@ -76,10 +77,12 @@ def explicit_wait(element, browser=browser, time=10):
 
 def molo_address(browser, element, value):
     # There are no simple way to check if react-autosuggest field is populated with value
+    explicit_wait(element)
+    element.click()
     element.send_keys(value)
-    sleep(2)
+    sleep(1.5)
     browser.switch_to.active_element.send_keys(Keys.DOWN)
-    sleep(2)
+    sleep(1)
     browser.switch_to.active_element.send_keys(Keys.ENTER)
 
 
@@ -94,35 +97,36 @@ def test_create_new_user(browser, applicant):
     explicit_wait(page.desired_loan_amount_input)
     browser.get(f'https://{URL}/calculator/')
 
-    # assert defaults
-    explicit_wait(page.income_input)
+    # No way to determine if API call is finished, so inserted sleep
+    sleep(3)
+
+    # Calculator page
+    explicit_wait(page.submit_button)
+    explicit_wait(page.desired_loan_amount_input)
     assert page.income_input.get_attribute("value") == '60,000'
     assert page.rent_input.get_attribute("value") == '1,200'
     assert page.property_value_input.get_attribute("value") == '250,000'
     assert page.desired_loan_amount_input.get_attribute("value") == '150,000'
-    # test starts here
 
-    # go to User data page
+    # User data page
     page.submit_button.click()
     page = DipUDataPage(browser)
     explicit_wait(page.tell_us)
-    assert page.tell_us.text == 'TELL US A BIT ABOUT YOURSELF'
     page.mr_choise.click()
-    if applicant['title'] == 'mr':
-        page.mr_choise_mr.click()
-        sleep(1)
+    explicit_wait(page.mr_choise)
+    page.mr_choise_mr.click()
+    sleep(1)
+    #
     page.first_name_input.send_keys(applicant['first_name'])
     page.first_name_input.click()
     page.last_name_input.send_keys(applicant['last_name'])
     page.phone_input.send_keys(applicant['phone'])
     page.birth_date_input.send_keys(applicant['birth_date'])
-    explicit_wait(page.address_input)
     molo_address(browser, page.address_input, applicant['register_address'])
-    #
     page.email_input.send_keys(applicant['email'])
     page.password_input.send_keys(applicant['password'])
 
-    # go to Consent page
+    # Consent page
     page.submit_button.click()
     page = DipConsentPage(browser)
     browser.find_element_by_xpath('//input[@data-test="consents-dip_common"]').click()
@@ -130,10 +134,14 @@ def test_create_new_user(browser, applicant):
     page.soft_credit_check_checkbox.click()
     page.privacy_policy_checkbox.click()
     page.submit_button.click()
+
+    # Almost page
+    explicit_wait(browser.find_element_by_xpath('//h2[text()="Your quote is on its way!"]'))
+    assert ('almost' in browser.current_url) == True
     sleep(10)
-    browser.close()
 
 
+# @pytest.mark.skip
 def test_login_and_be_happy_registered_user(browser, applicant):
     # time to activate user account manually. To be deleted
     global URL, CREDS
@@ -143,8 +151,10 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     # see 'https://github.com/w3c/webdriver/issues/385'
     explicit_wait(page.login_button)
     browser.get(f'https://{URL}/login/')
+    assert ('login' in browser.current_url) == True
     explicit_wait(page.login_button)
-    page.email_input.send_keys('vasily.medved+65374@djangostars.com')
+    assert (page.login_button.is_displayed() == True)
+    page.email_input.send_keys('vasily.medved+84363@djangostars.com')
     page.password_input.send_keys(applicant['password'])
     page.login_button.click()
     sleep(5)
@@ -171,7 +181,7 @@ def test_login_and_be_happy_registered_user(browser, applicant):
 
     # Address history verification page (optional)
     page = PropertyPage(browser)
-    sleep(5)
+    sleep(3)
     if ('address-history-verification' in browser.current_url) == True:
         explicit_wait(page.history_property)
         molo_address(browser, page.history_property, applicant['history_property_address'])
@@ -189,8 +199,7 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     page.bedroooms_qty_input.send_keys(applicant['bedrooms'])
     # the sleeps looks like optimal solution for race conditions between browser and selenium when working with custom MaterialUI React elements
     # see also https://blog.codeship.com/get-selenium-to-wait-for-page-load/
-    # sleep(1)
-
+    sleep(1)
     ActionChains(browser).move_to_element(page.property_type_dropdown).click(page.property_type_dropdown).perform()
     sleep(0.5)
     explicit_wait(page.property_type_mid_terrace_choice)
@@ -206,7 +215,12 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     page.exlocal_no_radiobutton.click()
     explicit_wait(page.continue_button)
     page.continue_button.click()
-    sleep(10)
+
+    # Select product page
+    page = ProductSelectorPage(browser)
+    explicit_wait(page.product_list_table)
+    assert ('select-product' in browser.current_url) == True
+    sleep(100)
 
 
 

@@ -27,7 +27,11 @@ class DipCalcPage:
 
     @property
     def rent_input(self):
-        return self.browser.find_element_by_xpath('//input[@data-test="dip-rent-amount"]')
+        return self.browser.find_element_by_xpath('//input[@data-test="dip-rent-amount"]')    \
+
+    @property
+    def products_table(self):
+        return self.browser.find_element_by_xpath('//div[@data-test="dip-products-list-table"]')
 
     @property
     def property_value_input(self):

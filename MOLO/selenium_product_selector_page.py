@@ -1,4 +1,4 @@
-class AddressPage:
+class ProductSelectorPage:
     def __init__(self, browser, url=None):
         self.browser = browser
         if url:
@@ -9,8 +9,12 @@ class AddressPage:
         return self.browser.driver
 
     @property
+    def loan_type_button(self):
+        return self.browser.find_element_by_xpath('//span[text()="New property"]')
+
+    @property
     def user_loan_amount_input(self):
-        return self.browser.find_by_name('desired_loan_amount')
+        return self.browser.find_element_by_name('desired_loan_amount')
 
     @property
     def deposit_selector(self):
@@ -21,8 +25,12 @@ class AddressPage:
         return self.browser.find_element_by_xpath('//div[@data-test="dip-application-loan-term-input"]')
 
     @property
+    def product_list_table(self):
+        return  self.browser.find_element_by_xpath('//div[@data-test="dip-products-list-option"]')
+
+    @property
     def product_checkbox(self):
-        return self.browser.find_by_name('product_id').first
+        return self.browser.find_elements_by_xpath('//input[@name="product_id"]')[0]
 
     @property
     def choose_product_button(self):
@@ -30,4 +38,4 @@ class AddressPage:
 
     @property
     def submit_button(self):
-        return self.browser.find_element_by_xpath('//div[@data-test="dip-application-product-continue-submit"]')
+        return self.browser.find_element_by_xpath('//button[@data-test="dip-application-product-continue-submit"]')

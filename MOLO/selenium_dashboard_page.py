@@ -13,6 +13,10 @@ class DashboardPage:
         return self.browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div/div/div/div[1]/header/span[1]')
 
     @property
+    def my_mortages_table(self):
+        return self.browser.find_element_by_xpath('//div[@data-test="dip-dashboard-mortgages-list-table"]')
+
+    @property
     def second_status(self):
         return self.browser.find_element_by_xpath('//span[@data-test="dip-dashboard-mortgage-status"]')
 

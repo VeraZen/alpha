@@ -81,7 +81,7 @@ class PropertyPage:
 
     @property
     def hmo_yes_radiobutton(self):
-        return self.browser.find_element_by_xpath('//input[@name="is_property_hmo"][@value="true"]')    \
+        return self.browser.find_element_by_xpath('//input[@name="is_property_hmo"][@value="true"]')
 
     @property
     def hmo_no_radiobutton(self):
