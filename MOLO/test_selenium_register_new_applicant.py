@@ -1,35 +1,35 @@
+import pytest
+from time import sleep
+from datetime import date, datetime, timedelta
+from random import randint
+#
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import *
-#
-
-import pytest
-from time import sleep
-from datetime import date, datetime, timedelta
-from random import randint
 #
 from selenium_header_page import HeaderPage
 from selenium_dip_consent_page import DipConsentPage
 from selenium_dip_calculator_page import DipCalcPage
 from selenium_dip_user_data_page import DipUDataPage
 from selenium_login_page import LoginPage
-from selenium_dashboard_page import DashboardPage
 from selenium_congrats_page import CongratsPage
 from selenium_property_page import PropertyPage
 from selenium_product_selector_page import ProductSelectorPage
 from selenium_product_terms_page import ProductTerms
+from selenium_onfido_page import Onfido
+
 
 URL = 'dev.app.molofinance.com'
 CREDS = 'molo:lambda'
+
 
 @pytest.fixture
 def browser():
     driver = webdriver.Chrome()
     # driver.maximize_window()
-    driver.implicitly_wait(20)
+    driver.implicitly_wait(30)
     return driver
 
 
@@ -86,6 +86,14 @@ def molo_address(browser, element, value):
     browser.switch_to.active_element.send_keys(Keys.ENTER)
 
 
+def molo_clear_input(element, browser=browser):
+    sleep(0.5)
+    element.click()
+    element.send_keys(Keys.CONTROL + "a")
+    element.send_keys(Keys.DELETE)
+    sleep(0.5)
+
+
 @pytest.mark.skip
 def test_create_new_user(browser, applicant):
     # TBD get rid of this
@@ -97,7 +105,7 @@ def test_create_new_user(browser, applicant):
     explicit_wait(page.desired_loan_amount_input)
     browser.get(f'https://{URL}/calculator/')
 
-    # No way to determine if API call is finished, so inserted sleep
+    # No way to determine if background API call is finished, so inserted sleep
     sleep(3)
 
     # Calculator page
@@ -116,6 +124,7 @@ def test_create_new_user(browser, applicant):
     explicit_wait(page.mr_choise)
     page.mr_choise_mr.click()
     sleep(1)
+
     #
     page.first_name_input.send_keys(applicant['first_name'])
     page.first_name_input.click()
@@ -129,8 +138,8 @@ def test_create_new_user(browser, applicant):
     # Consent page
     page.submit_button.click()
     page = DipConsentPage(browser)
-    browser.find_element_by_xpath('//input[@data-test="consents-dip_common"]').click()
-    browser.find_element_by_xpath('//input[@data-test="consents-marketing"]').click()
+    page.dip_common_checkbox.click()
+    page.marketing_checkbox.click()
     page.soft_credit_check_checkbox.click()
     page.privacy_policy_checkbox.click()
     page.submit_button.click()
@@ -154,7 +163,7 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     assert ('login' in browser.current_url) == True
     explicit_wait(page.login_button)
     assert (page.login_button.is_displayed() == True)
-    page.email_input.send_keys('vasily.medved+84363@djangostars.com')
+    page.email_input.send_keys('vasily.medved+67619@djangostars.com')
     page.password_input.send_keys(applicant['password'])
     page.login_button.click()
     sleep(5)
@@ -216,11 +225,51 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     explicit_wait(page.continue_button)
     page.continue_button.click()
 
-    # Select product page
+    # Product selection page
     page = ProductSelectorPage(browser)
     explicit_wait(page.product_list_table)
     assert ('select-product' in browser.current_url) == True
-    sleep(100)
+    explicit_wait(page.loan_type_button)
+    page.loan_type_button.click()
+    page.user_loan_amount_input.click()
+    molo_clear_input(page.user_loan_amount_input)
+    page.user_loan_amount_input.send_keys(applicant['loan_amount'])
+    page.product_checkbox.click()
+    explicit_wait(page.submit_button)
+    page.submit_button.click()
+    explicit_wait(page.x_button)
+    sleep(1)
+    ActionChains(browser).move_to_element(page.x_button).click().perform()
+    page.submit_button.click()
+
+    # Product terms page
+    page = ProductTerms(browser)
+    explicit_wait(page.submit_button)
+    assert ('terms-conditions' in browser.current_url) == True
+    page.allow_fraud_checkbox.click()
+    page.automated_assessment_checkbox.click()
+    page.full_credit_search_checkbox.click()
+    page.mortgage_conditions_checkbox.click()
+    page.submit_button.click()
+
+    #  Onfido page
+    page = Onfido(browser)
+    explicit_wait(page.start_passport_check)
+    page.start_passport_check.click()
+    sleep(3)
+    page.passport_file_drop_zone.send_keys('D:\\code\\molo\\alpha\\MOLO\\passport.jpg')
+    explicit_wait(page.passport_confirm_button)
+    page.passport_confirm_button.click()
+    page.selfie_file_drop_zone.send_keys('D:\\code\\molo\\alpha\\MOLO\\selfie.jpg')
+    explicit_wait(page.selfie_confirm_button)
+    page.selfie_confirm_button.click()
+    explicit_wait(page.submit_button)
+    page.submit_button.click()
+
+    # Congrats page
+    explicit_wait(browser.find_element_by_xpath('//h3[text()="Congratulations!"]'))
+    assert ('complete-offer' in browser.current_url) == True
+    sleep(5)
 
 
 
