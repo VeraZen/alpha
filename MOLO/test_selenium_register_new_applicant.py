@@ -22,7 +22,7 @@ from selenium_onfido_page import Onfido
 
 
 URL = 'dev.app.molofinance.com'
-CREDS = 'molo:lambda'
+CREDS = ':'
 
 
 @pytest.fixture
