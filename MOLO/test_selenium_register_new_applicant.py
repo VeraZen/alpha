@@ -44,9 +44,9 @@ def applicant():
     # Applicant data
     applicant = {
         'title': 'mr',
-        'first_name': 'Jonathan',
+        'first_name': 'PutCorrectName',
         'middle_name': 'Middle',
-        'last_name': 'Frafer',
+        'last_name': 'PutCorrectSurname',
         'phone': '+44 161 4521 254',
         'register_address': '60 Westfield Road, Barton-Upon-Humber, DN18',
         'history_property_address': '34 Abbots Road, Abbots Langley, WD5',
