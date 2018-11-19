@@ -21,8 +21,8 @@ from selenium_product_terms_page import ProductTerms
 from selenium_onfido_page import Onfido
 
 
-URL = 'dev.app.molofinance.com'
-CREDS = ':'
+URL = ''
+CREDS = ''
 
 
 @pytest.fixture
@@ -44,9 +44,9 @@ def applicant():
     # Applicant data
     applicant = {
         'title': 'mr',
-        'first_name': 'PutCorrectName',
+        'first_name': '',
         'middle_name': 'Middle',
-        'last_name': 'PutCorrectSurname',
+        'last_name': '',
         'phone': '+44 161 4521 254',
         'register_address': '60 Westfield Road, Barton-Upon-Humber, DN18',
         'history_property_address': '34 Abbots Road, Abbots Langley, WD5',
@@ -163,7 +163,7 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     assert ('login' in browser.current_url) == True
     explicit_wait(page.login_button)
     assert (page.login_button.is_displayed() == True)
-    page.email_input.send_keys('vasily.medved+67619@djangostars.com')
+    page.email_input.send_keys('@djangostars.com')
     page.password_input.send_keys(applicant['password'])
     page.login_button.click()
     sleep(5)
@@ -212,6 +212,7 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     ActionChains(browser).move_to_element(page.property_type_dropdown).click(page.property_type_dropdown).perform()
     sleep(0.5)
     explicit_wait(page.property_type_mid_terrace_choice)
+    sleep(0.5)
     page.property_type_mid_terrace_choice.click()
     sleep(1)
     ActionChains(browser).move_to_element(page.property_construction_material_dropdown).click(
@@ -237,10 +238,13 @@ def test_login_and_be_happy_registered_user(browser, applicant):
     page.product_checkbox.click()
     explicit_wait(page.submit_button)
     page.submit_button.click()
-    explicit_wait(page.x_button)
-    sleep(1)
-    ActionChains(browser).move_to_element(page.x_button).click().perform()
-    page.submit_button.click()
+    explicit_wait(page.confirm_selection_button)
+    page.confirm_selection_button.click()
+    # Seems that product properties popup was removed
+    # explicit_wait(page.x_button)
+    # sleep(1)
+    # ActionChains(browser).move_to_element(page.x_button).click().perform()
+    # page.submit_button.click()
 
     # Product terms page
     page = ProductTerms(browser)

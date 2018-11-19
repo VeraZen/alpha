@@ -10,7 +10,7 @@ class ProductSelectorPage:
 
     @property
     def loan_type_button(self):
-        return self.browser.find_element_by_xpath('//span[text()="New property"]')
+        return self.browser.find_element_by_xpath('//span[text()="Purchase"]')
 
     @property
     def user_loan_amount_input(self):
@@ -39,3 +39,12 @@ class ProductSelectorPage:
     @property
     def submit_button(self):
         return self.browser.find_element_by_xpath('//button[@data-test="dip-application-product-continue-submit"]')
+
+    @property
+    def x_button(self):
+        return self.browser.find_element_by_xpath('//div[text()="✕"]')    \
+
+
+    @property
+    def confirm_selection_button(self):
+        return self.browser.find_element_by_xpath('//button')
